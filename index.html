@@ -16,7 +16,7 @@
         }
 
         h2 {
-            border-bottom: 2px solid #ff0000;
+            border-bottom: 2px solid #76c0ea;
             padding-bottom: 10px;
         }
 
@@ -42,13 +42,15 @@
             padding: 8px;
             box-sizing: border-box;
         }
+
         .center {
             text-align: center;
 
-            
+
         }
+
         .button {
-            background-color: #ff0000;
+            background-color: #76c0ea;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -56,11 +58,11 @@
             cursor: pointer;
             border-radius: 5px;
 
-            
+
         }
 
         .button:hover {
-            background-color: #cc0000;
+            background-color: #509BEA;
         }
 
 
@@ -101,12 +103,16 @@
             text-decoration: underline;
         }
 
-        fixui {
-            position: fixed;
-            color: red;
+        .legal_info {
+
+
+            color: gray;
             font-weight: bold;
             display: block;
+            padding: auto;
             margin-top: 20px;
+            margin-bottom: 20px;
+            font-size: 10px;
         }
 
         #output {
@@ -122,17 +128,19 @@
 
     <div class="input-group">
         <label for="apiKey">APIキー:</label>
-        <input type="text" id="apiKey" placeholder="AIzaSy... から始まるAPIキーを入力してください">
+        <input type="text" id="apiKey" placeholder="AIzaSy... から始まる、
+有効なYouTube Data API v3のAPIキーを入力してください">
     </div>
     <div>
         <p>
-            <explanation_label><a href="https://github.com/kentama316-beep/knt_mengen_list/blob/master/URLs.txt" target="_blank">github.com/kentama316-beep/knt_mengen_list/blob/master/URLs.txt</a> &ensp;から
+            <explanation_label><a href="https://github.com/kentama316-beep/knt_mengen_list/blob/master/URLs.txt"
+                    target="_blank">github.com/kentama316-beep/knt_mengen_list/blob/master/URLs.txt</a> &ensp;から
             </explanation_label>
             <copy_button onclick="copyToClipboard()">
-                
+
                 <b>天音かなた</b>のメン限URLをコピーする
 
-                
+
 
             </copy_button>
 
@@ -145,16 +153,15 @@
         <label for="urls">YouTube URLのリスト (1行に1つURLを貼り付けてください):</label>
         <textarea id="urls"
             placeholder="https://www.youtube.com/watch?v=...&#10;https://www.youtube.com/watch?v=..."></textarea>
+        <p id="linecount">行数: 0</p>
     </div>
 
     <div class="center">
         <span class="button" onclick="fetchYouTubeData()">
-        データを取得してZIPで保存
-    </span>
+            データを取得してZIPで保存
+        </span>
     </div>
-    <div class="fixui">
-        MIT
-    </div>
+
 
     <div id="output"></div>
 
@@ -164,10 +171,57 @@
         <p>WindowsなどのOSの自動保護機能により、解凍時に警告が表示されることがあります。</p>
         <p>Windowsの場合は解凍前にzipのプロパティを変更するか、それでも解決しない場合あるいは他のOSの場合は<a
                 href="https://7-zip.opensource.jp/download.html">7-Zip</a>などの解凍ソフトを使用して解凍してください。</p>
-        </p>
-    </details>
 
+    </details>
+    <p></p>
+    <details id=pattern1>
+
+        <summary>URLの形式</summary>
+        <p>基本的にはYouTubeから共有したURLをそのまま貼れば問題ありませんが、もし動かなかった場合は、以下の形式を推奨します。</p>
+        <dl>
+
+            <dd><span style="white-space: nowrap;">https://www.youtube.com/watch?v={VideoID}</span></dd>
+            <dd><span style="white-space: nowrap;">例: https://www.youtube.com/watch?v=LF87NAkWkZo</span></dd>
+            <dt>VideoIDの形式:</dt>
+            <dd>
+                <dl>
+                    <dt>ここで、{VideoID}はYouTube上で一意に識別される動画のIDで、以下の形式です。</dt>
+                    <dd>英数字とハイフン、アンダースコアを組み合わせる可能性のある11文字で構成(すべて半角)</dd>
+
+                    <dd>末尾の?si=xxxxはないことを確認してください。</dd>
+            </dd>
+        </dl>
+    </details>
+    <p></p>
+    <details id=pattern1>
+
+        <summary>APIについて</summary>
+        <p>このアプリはYouTube Data API v3を使用して動画の情報を取得しています。</p>
+        <p>APIキーはGoogle Cloud PlatformでYouTube Data API v3を有効にしたプロジェクトから取得できます。</p>
+        <p>APIにはクオータ制限があります。詳細は<a href="https://developers.google.com/youtube/v3/getting-started#quota"
+                target="_blank">YouTube Data API v3の公式ドキュメント</a>をご確認ください。</p>
+        <p>このアプリでは、クオータを無駄にしないために、1回のリクエストで最大50個の動画情報を取得しており、</p>
+        <p>それを1回または複数回実行しています。</p>
+    </details>
+    <div class="legal_info">
+
+        <p>このアプリは完全にクライアントサイドで動作し、APIキーもブラウザ内でのみ使用されます。安全にご利用いただけます。</p>
+        <p>天音かなた はカバー株式会社の登録商標です。</p>
+        <p>YouTube はグーグル&emsp;エルエルシーの登録商標です。</p>
+        <p>Windows はマイクロソフト&emsp;コーポレイションの登録商標です。</p>
+    </div>
     <script>
+
+        const input = document.getElementById('urls');
+        const lineCountDisplay = document.getElementById('linecount');
+        input.addEventListener('input', () => {
+            //改行だけの行を無視して行数をカウントする
+
+            const lines = document.getElementById('urls').value.trim();
+            const lineCount = lines.split(/\r?\n|\r/).filter(line => line.trim() !== '');
+            lineCountDisplay.textContent = `行数: ${lineCount.length}`;
+        });
+
         async function fetchYouTubeData() {
             const apiKey = document.getElementById('apiKey').value.trim();
             const urlsText = document.getElementById('urls').value.trim();
