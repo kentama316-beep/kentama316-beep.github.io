@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta charset="UTF-8">
+    <title>Mengen Info Downloader</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h2 {
+            border-bottom: 2px solid #ff0000;
+            padding-bottom: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .center {
+            text-align: center;
+
+            
+        }
+        .button {
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+
+            
+        }
+
+        .button:hover {
+            background-color: #cc0000;
+        }
+
+
+
+        #pattern1 {
+            background-color: #eaea2f97;
+            width: 300px;
+        }
+
+        explanation_label {
+            color: gray;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 2px;
+            font-size: 13px;
+
+        }
+
+        copy_button {
+            background-color: #76c0ea;
+            color: white;
+            border: none;
+            padding: 4px 20px;
+            font-size: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            margin-top: 10px;
+
+        }
+
+        copy_button:hover {
+            background-color: #509BEA;
+        }
+
+        a {
+            color: gray;
+            text-decoration: underline;
+        }
+
+        fixui {
+            position: fixed;
+            color: red;
+            font-weight: bold;
+            display: block;
+            margin-top: 20px;
+        }
+
+        #output {
+            margin-top: 30px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Mengen Info Downloader</h2>
+
+    <div class="input-group">
+        <label for="apiKey">APIキー:</label>
+        <input type="text" id="apiKey" placeholder="AIzaSy... から始まるAPIキーを入力してください">
+    </div>
+    <div>
+        <p>
+            <explanation_label><a href="https://github.com/kentama316-beep/knt_mengen_list/blob/master/URLs.txt" target="_blank">github.com/kentama316-beep/knt_mengen_list/blob/master/URLs.txt</a> &ensp;から
+            </explanation_label>
+            <copy_button onclick="copyToClipboard()">
+                
+                <b>天音かなた</b>のメン限URLをコピーする
+
+                
+
+            </copy_button>
+
+            </explanation_label>
+        </p>
+        <br>
+
+    </div>
+    <div class="input-group">
+        <label for="urls">YouTube URLのリスト (1行に1つURLを貼り付けてください):</label>
+        <textarea id="urls"
+            placeholder="https://www.youtube.com/watch?v=...&#10;https://www.youtube.com/watch?v=..."></textarea>
+    </div>
+
+    <div class="center">
+        <span class="button" onclick="fetchYouTubeData()">
+        データを取得してZIPで保存
+    </span>
+    </div>
+    <div class="fixui">
+        MIT
+    </div>
+
+    <div id="output"></div>
+
+    <details id=pattern1>
+        <summary>zip解凍時に「問題を引き起こす可能性のあるファイル」などと言われる場合</summary>
+        <p>私はこのアプリケーションに一切の悪意を含んでいないことを保証しますが、</p>
+        <p>WindowsなどのOSの自動保護機能により、解凍時に警告が表示されることがあります。</p>
+        <p>Windowsの場合は解凍前にzipのプロパティを変更するか、それでも解決しない場合あるいは他のOSの場合は<a
+                href="https://7-zip.opensource.jp/download.html">7-Zip</a>などの解凍ソフトを使用して解凍してください。</p>
+        </p>
+    </details>
+
+    <script>
+        async function fetchYouTubeData() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const urlsText = document.getElementById('urls').value.trim();
+            const outputDiv = document.getElementById('output');
+
+            if (!apiKey) {
+                alert("APIキーを入力してください！");
+                return;
+            }
+            if (!urlsText) {
+                alert("URLを入力してください！");
+                return;
+            }
+
+            outputDiv.innerHTML = "<p style='color:blue;'>データを取得中です... 少々お待ちください。</p>";
+
+            // URLから動画IDを抽出
+            const lines = urlsText.split('\n');
+            const videoIds = [];
+
+            for (let line of lines) {
+                line = line.trim();
+                if (!line) continue;
+
+                videoIds.push(extractYouTubeVideoId(line));
+            }
+
+            if (videoIds.length === 0) {
+                outputDiv.innerHTML = "<p style='color:red;'>有効なYouTubeのURLが見つかりませんでした。</p>";
+                return;
+            }
+
+            let allVideoInfo = [];
+            for (let i = 0; i < videoIds.length; i += 50) {
+                const chunk = videoIds.slice(i, i + 50);
+                const idsString = chunk.join(',');
+                const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${idsString}&key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) throw new Error(`API通信エラー: ${response.status}`);
+                    const data = await response.json();
+
+                    if (data.items) {
+                        allVideoInfo = allVideoInfo.concat(data.items);
+                    }
+                } catch (error) {
+                    outputDiv.innerHTML = `<p style="color:red;">エラーが発生しました: ${error.message}<br>APIキーが間違っていないか確認してください。</p>`;
+                    return;
+                }
+            }
+
+            if (allVideoInfo.length === 0) {
+                outputDiv.innerHTML = "<p style='color:red;'>動画データが取得できませんでした。</p>";
+                return;
+            }
+
+            outputDiv.innerHTML = "<p style='color:orange;'>データを取得しました。ZIPファイルを作成しています...</p>";
+
+            // ここからZIPファイルを作成する処理
+            const zip = new JSZip();
+
+            for (const video of allVideoInfo) {
+                const title = video.snippet.title || "";
+                const time = video.snippet.publishedAt || "";
+                const desc = video.snippet.description || "";
+                const videoId = video.id;
+
+
+
+                zip.file(`${videoId}/title.txt`, title);
+                zip.file(`${videoId}/time.txt`, time);
+                zip.file(`${videoId}/description.txt`, desc);
+                //こうしないとWindowsくんがおこる
+
+
+
+                // そのフォルダの中に3つのテキストファイルを作成
+                // folder.file("title.txt", title);
+                // folder.file("time.txt", time);
+                // folder.file("description.txt", desc);
+            }
+
+            // ZIPファイルを生成してダウンロードさせる
+            zip.generateAsync({ type: "blob" })
+                .then(function (content) {
+                    // ダウンロード用の見えないリンクを作って自動クリックさせる
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(content);
+                    link.download = "youtube_outputs.zip"; // 保存されるファイル名
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    outputDiv.innerHTML = `<p style='color:green;'>完了 <br>${allVideoInfo.length}件の動画データを「youtube_outputs.zip」としてダウンロードしました。</p>`;
+                })
+                .catch(function (error) {
+                    outputDiv.innerHTML = `<p style="color:red;">ZIP作成中にエラーが発生しました: ${error}</p>`;
+                });
+
+
+            function extractYouTubeVideoId(url) {
+                if (!url || typeof url !== 'string') return null;
+
+                // まず一般的な形式を正規表現で一括処理
+                const regex =
+                    /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/;
+                url = url.trim();
+                const match = url.match(regex);
+                if (match && match[1]) {
+                    return match[1];
+                }
+
+                // フォールバック: URLオブジェクトで解析
+                try {
+                    const parsed = new URL(url);
+
+                    // watch?v=xxxx
+                    if (parsed.searchParams.get('v')) {
+                        return parsed.searchParams.get('v');
+                    }
+
+                    // youtu.be/xxxx
+                    if (parsed.hostname.includes('youtu.be')) {
+                        return parsed.pathname.split('/')[1];
+                    }
+
+                    // /embed/xxxx や /shorts/xxxx
+                    const paths = parsed.pathname.split('/');
+                    for (const p of paths) {
+                        if (/^[A-Za-z0-9_-]{11}$/.test(p)) {
+                            return p;
+                        }
+                    }
+                } catch (e) {
+                    // URLとしてパースできない場合は無視
+                }
+
+                return null;
+            }
+
+        }
+
+        const text = "Hello World";
+
+        async function copyToClipboard() {
+            console.log("Hello World");
+            try {
+                await navigator.clipboard.writeText(await GetGitHubFileContent());
+                alert("コピーしました");
+            } catch (err) {
+                console.error("コピーに失敗しました:", err);
+            }
+        }
+
+
+        async function GetGitHubFileContent() {
+            const owner = "kentama316-beep";
+            const repo = "knt_mengen_list";
+            const branch = "master";
+            const path = "URLs.txt";
+
+            const temp = "refs/heads";
+
+            const url = `https://raw.githubusercontent.com/${owner}/${repo}/${temp}/${branch}/${path}`;
+
+            const res = await fetch(url)
+
+            const text = await res.text();
+            console.log(text);
+            return text;
+        }
+    </script>
+</body>
+
+</html>
