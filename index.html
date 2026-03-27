@@ -20,69 +20,106 @@
             padding-bottom: 10px;
         }
 
-        .input-group {
+        .description {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
             margin-bottom: 20px;
         }
 
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 5px;
-        }
+        .standard_area {
+            background-color: #a7d8ec7a;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
 
-        input[type="text"] {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-        }
+            .input-group {
+                margin-bottom: 20px;
+            }
 
-        textarea {
-            width: 100%;
-            height: 150px;
-            padding: 8px;
-            box-sizing: border-box;
-        }
+            label {
+                font-weight: bold;
+                display: block;
+                margin-bottom: 5px;
+            }
 
-        .lines {
-            display: flex;
+            input[type="text"] {
+                width: 100%;
+                padding: 8px;
+                box-sizing: border-box;
+            }
 
-            /*URLエンコードされた改行コードを変換*/
-            .uri_decode_button {
+            textarea {
+                width: 100%;
+                height: 150px;
+                padding: 8px;
+                box-sizing: border-box;
+            }
 
+            .lines {
+                display: flex;
+
+                /*URLエンコードされた改行コードを変換*/
+                .uri_decode_button {
+
+                    color: white;
+                    border: none;
+                    padding: 10px 5px;
+                    font-size: 10px;
+                    cursor: pointer;
+                    border-radius: 5px;
+
+
+                }
+            }
+
+            .centring {
+                       /* 余白指定 */
+    text-align:  center;        /* 中央寄せ */
+            /* 高さ指定 */
+
+            }
+
+            .button {
+                background-color: #76c0ea;
                 color: white;
                 border: none;
-                padding: 10px 5px;
-                font-size: 10px;
+                padding: 10px 20px;
+                font-size: 16px;
                 cursor: pointer;
                 border-radius: 5px;
 
 
             }
+
+            .button:hover {
+                background-color: #509BEA;
+            }
+
+        
+            copy_button {
+                background-color: #76c0ea;
+                color: white;
+                border: none;
+                padding: 4px 20px;
+                font-size: 10px;
+                cursor: pointer;
+                border-radius: 5px;
+                margin-bottom: 20px;
+                margin-top: 10px;
+
+            }
+
+            copy_button:hover {
+                background-color: #509BEA;
+            }
+
+            a {
+                color: gray;
+                text-decoration: underline;
+            }
+
         }
-
-        .center {
-            text-align: center;
-
-
-        }
-
-        .button {
-            background-color: #76c0ea;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-
-
-        }
-
-        .button:hover {
-            background-color: #509BEA;
-        }
-
-
 
         #pattern1 {
             background-color: #eaea2f97;
@@ -97,30 +134,10 @@
             display: block;
             margin-bottom: 2px;
             font-size: 13px;
-            
-        }
-
-        copy_button {
-            background-color: #76c0ea;
-            color: white;
-            border: none;
-            padding: 4px 20px;
-            font-size: 10px;
-            cursor: pointer;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            margin-top: 10px;
 
         }
 
-        copy_button:hover {
-            background-color: #509BEA;
-        }
 
-        a {
-            color: gray;
-            text-decoration: underline;
-        }
 
         .legal_info {
 
@@ -144,13 +161,16 @@
 <body>
 
     <h2>Mengen Info Downloader</h2>
-
-    <div class="input-group">
-        <label for="apiKey">APIキー:</label>
-        <input type="text" id="apiKey" placeholder="AIzaSy... から始まる、
+    <description>
+        <p>このアプリは、YouTubeの動画URLのリストを入力すると、その動画のタイトル、公開日時(UTC+0)、説明文をテキストファイルとしてまとめたZIPファイルを生成してダウンロードするツールです。</p>
+    </description>
+    <div class="standard_area">
+        <div class="input-group">
+            <label for="apiKey">APIキー:</label>
+            <input type="text" id="apiKey" placeholder="AIzaSy... から始まる、
 有効なYouTube Data API v3のAPIキーを入力してください">
-    </div>
-    <div>
+        </div>
+
         <p>
             <explanation_label><a href="https://github.com/kentama316-beep/knt_mengen_list/blob/master/URLs.txt"
                     target="_blank">github.com/kentama316-beep/knt_mengen_list/blob/master/URLs.txt</a> &ensp;から
@@ -163,31 +183,33 @@
 
             </copy_button>
 
-            </explanation_label>
+
         </p>
         <br>
 
-    </div>
-    <div class="input-group">
-        <label for="urls">YouTube URLのリスト (1行に1つURLを貼り付けてください):</label>
-        <textarea id="urls"
-            placeholder="https://www.youtube.com/watch?v=...&#10;https://www.youtube.com/watch?v=..."></textarea>
-        <div class="lines">
-            <p id="linecount">行数: 0</p>
-            <div class="uri_decode_button"><input type="button" value="URIエンコードされた改行を変換"></div>
+
+        <div class="input-group">
+            <label for="urls">YouTube URLのリスト (1行に1つURLを貼り付けてください):</label>
+            <textarea id="urls"
+                placeholder="https://www.youtube.com/watch?v=...&#10;https://www.youtube.com/watch?v=..."></textarea>
+            <div class="lines">
+                <p id="linecount">行数: 0</p>
+                <div class="uri_decode_button"><input type="button" value="URIエンコードされた改行を変換"></div>
+            </div>
         </div>
 
 
 
 
-    </div>
 
-    <div class="center">
-        <span class="button" onclick="fetchYouTubeData()">
-            データを取得してZIPで保存
-        </span>
-    </div>
+        <div class="centring">
+            <span class="button" onclick="fetchYouTubeData()">
+                データを取得してZIPで保存
+            </span>
+        </div>
 
+        
+    </div>
 
     <div id="output"></div>
 
@@ -207,7 +229,8 @@
         <dl>
 
             <dd><span style="white-space: nowrap; color: green;">https://www.youtube.com/watch?v={VideoID}</span></dd>
-            <dd>例: <span style="white-space: nowrap; color: green">https://www.youtube.com/watch?v=LF87NAkWkZo</span></dd>
+            <dd>例: <span style="white-space: nowrap; color: green">https://www.youtube.com/watch?v=LF87NAkWkZo</span>
+            </dd>
             <dt>VideoIDの形式:</dt>
             <dd>
                 <dl>
