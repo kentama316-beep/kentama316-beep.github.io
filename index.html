@@ -43,6 +43,23 @@
             box-sizing: border-box;
         }
 
+        .lines {
+            display: flex;
+
+            /*URLエンコードされた改行コードを変換*/
+            .uri_decode_button {
+
+                color: white;
+                border: none;
+                padding: 10px 5px;
+                font-size: 10px;
+                cursor: pointer;
+                border-radius: 5px;
+
+
+            }
+        }
+
         .center {
             text-align: center;
 
@@ -153,7 +170,14 @@
         <label for="urls">YouTube URLのリスト (1行に1つURLを貼り付けてください):</label>
         <textarea id="urls"
             placeholder="https://www.youtube.com/watch?v=...&#10;https://www.youtube.com/watch?v=..."></textarea>
-        <p id="linecount">行数: 0</p>
+        <div class="lines">
+            <p id="linecount">行数: 0</p>
+            <div class="uri_decode_button"><input type="button" value="URIエンコードされた改行を変換"></div>
+        </div>
+        
+
+      
+
     </div>
 
     <div class="center">
@@ -221,6 +245,18 @@
             const lineCount = lines.split(/\r?\n|\r/).filter(line => line.trim() !== '');
             lineCountDisplay.textContent = `行数: ${lineCount.length}`;
         });
+
+        const uridecode_bt = document.querySelector('.uri_decode_button');
+        uridecode_bt.addEventListener('click', () => {
+
+            //%0D%0Aや%0A などのURLエンコードされた改行コードを変換する
+            const textarea = document.getElementById('urls');
+
+            const decodedLines = textarea.value.replace(/%0D%0A|%0A/g, '\n');
+            console.log(decodedLines);
+            textarea.value = decodedLines;
+        });
+
 
         async function fetchYouTubeData() {
             const apiKey = document.getElementById('apiKey').value.trim();
