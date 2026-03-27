@@ -290,20 +290,28 @@
         input.addEventListener('input', () => {
             //改行だけの行を無視して行数をカウントする
 
+            countLines();
+        });
+        function countLines() {
             const lines = document.getElementById('urls').value.trim();
             const lineCount = lines.split(/\r?\n|\r/).filter(line => line.trim() !== '');
             lineCountDisplay.textContent = `行数: ${lineCount.length}`;
-        });
+        }
 
         const uridecode_bt = document.querySelector('.uri_decode_button');
         uridecode_bt.addEventListener('click', () => {
 
             //%0D%0Aや%0A などのURLエンコードされた改行コードを変換する
             const textarea = document.getElementById('urls');
+            
 
             const decodedLines = textarea.value.replace(/%0D%0A|%0A/g, '\n');
+            
             console.log(decodedLines);
+
             textarea.value = decodedLines;
+
+            countLines();
         });
 
 
